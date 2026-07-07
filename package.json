@@ -1,0 +1,85 @@
+{
+  "name": "@zoxon/mater",
+  "type": "module",
+  "version": "1.0.0",
+  "packageManager": "pnpm@10.33.0",
+  "description": "Foundational TemplateResult runtime for JSX and tagged-template UI.",
+  "author": "Konstantin Velichko",
+  "license": "MIT",
+  "homepage": "https://github.com/zoxon/mater#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoxon/mater.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zoxon/mater/issues"
+  },
+  "keywords": [
+    "html",
+    "jsx",
+    "template",
+    "typescript",
+    "ui"
+  ],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.mjs",
+      "require": "./dist/browser.cjs"
+    },
+    "./jsx-runtime": {
+      "types": "./dist/jsx-runtime.d.ts",
+      "import": "./dist/jsx-runtime.mjs",
+      "require": "./dist/jsx-runtime.cjs"
+    },
+    "./jsx-dev-runtime": {
+      "types": "./dist/jsx-dev-runtime.d.ts",
+      "import": "./dist/jsx-dev-runtime.mjs",
+      "require": "./dist/jsx-dev-runtime.cjs"
+    }
+  },
+  "browser": true,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "LICENSE",
+    "README.md",
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup",
+    "release": "pnpm build && changeset publish",
+    "prepare": "pnpm build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^8.2.0",
+    "@changesets/cli": "^2.29.4",
+    "@types/node": "^20.0.0",
+    "eslint": "^10.3.0",
+    "happy-dom": "^15.11.7",
+    "tsup": "^8.5.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.5.0"
+  }
+}
