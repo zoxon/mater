@@ -18,7 +18,7 @@ pnpm add @zoxon/mater
 
 ```ts
 import { html, raw, render } from '@zoxon/mater'
-import { html, render } from '@zoxon/mater/browser'
+import { html } from '@zoxon/mater/browser'
 ```
 
 ### `html\`...\`` → `TemplateResult`
@@ -31,7 +31,7 @@ const view = html`<button class=${'btn'} disabled=${true}>${label}</button>`
 
 ### `render(result)` → `string`
 
-Converts a `TemplateResult` to a plain HTML string. Use at system boundaries (DOM insertion, serialization).
+Converts a `TemplateResult` to a plain HTML string. Use at string boundaries (SSR, serialization).
 
 ```ts
 const parser = new DOMParser()
@@ -109,6 +109,106 @@ export function Card({ title, body }: CardProps): TemplateResult {
 // boundary — convert once, use the string
 const htmlString = render(Card({ title: 'Hi', body: trustedHtml }))
 ```
+
+## Server/client reuse
+
+Keep shared components in plain TypeScript and return `TemplateResult`. Convert only at the boundary:
+
+```ts
+// CurrencyValue.ts
+import { html, type TemplateResult } from '@zoxon/mater'
+
+export interface CurrencyValueProps {
+  value?: string | number | null
+  precision?: number
+  ticker?: string
+  grayed?: boolean
+  class?: string | string[]
+}
+
+export function CurrencyValue(props: CurrencyValueProps): TemplateResult {
+  const value = props.value == null ? '-' : Number(props.value).toFixed(props.precision ?? 2)
+
+  return html`<span class=${['currency-value', props.grayed && 'is-grayed', props.class]}>
+    ${value}${props.ticker ? html` <small>${props.ticker}</small>` : null}
+  </span>`
+}
+```
+
+```astro
+---
+// CurrencyValue.astro
+import { render } from '@zoxon/mater'
+import { CurrencyValue } from './CurrencyValue'
+
+const html = render(CurrencyValue(Astro.props))
+---
+
+<Fragment set:html={html} />
+```
+
+```ts
+// client.ts
+import { CurrencyValue } from './CurrencyValue'
+
+currencyElement.replaceWith(CurrencyValue(props).element)
+```
+
+Use `.dom` instead of `.element` for multi-root templates.
+
+### Astro with JSX
+
+Use Mater's JSX runtime for `.tsx` components:
+
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "@zoxon/mater"
+  }
+}
+```
+
+```ts
+// astro.config.mjs
+import { defineConfig } from 'astro/config'
+
+export default defineConfig({
+  vite: {
+    esbuild: {
+      jsx: 'automatic',
+      jsxImportSource: '@zoxon/mater',
+    },
+  },
+})
+```
+
+```tsx
+// CurrencyValue.tsx
+import type { TemplateResult } from '@zoxon/mater'
+
+export interface CurrencyValueProps {
+  value?: string | number | null
+  precision?: number
+  ticker?: string
+  grayed?: boolean
+  class?: string | string[]
+}
+
+export function CurrencyValue(props: CurrencyValueProps): TemplateResult {
+  const value = props.value == null ? '-' : Number(props.value).toFixed(props.precision ?? 2)
+
+  return (
+    <span class={['currency-value', props.grayed && 'is-grayed', props.class]}>
+      {value}
+      {props.ticker ? <small> {props.ticker}</small> : null}
+    </span>
+  )
+}
+```
+
+An Astro integration can wrap the Vite config, but projects still need TypeScript/editor JSX settings. Add one only when this setup is repeated enough to justify a preset.
 
 ## Browser projections
 
