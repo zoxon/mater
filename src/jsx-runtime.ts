@@ -104,6 +104,8 @@ const VOID_ELEMENTS = new Set([
   'wbr',
 ])
 
+const TAG_NAME_RE = /^[a-z][\w.:-]*$/i
+
 function isIterable(value: unknown): value is Iterable<Child> {
   return value != null && typeof value !== 'string' && Symbol.iterator in new Object(value)
 }
@@ -162,6 +164,9 @@ export function jsx(name: string | ((props: Props) => TemplateResult), props: Pr
 
   if (typeof name === 'function')
     return name(attributes)
+
+  if (!TAG_NAME_RE.test(name))
+    throw new TypeError(`Invalid tag name "${name}"`)
 
   const children = normalizeChild(attributes.children)
   const attrs = renderAttrsObject(normalizeAttributes(attributes))

@@ -1,19 +1,16 @@
-import type { TemplateResult } from '../core/template-result.js'
 import type { TemplateValue } from '../core/types.js'
 import type { AttrMap, AttrValue } from './attributes.js'
 import { escapeHtml } from '../core/escape.js'
 import { RawHtml } from '../core/raw-html.js'
 import { SafeHtml } from '../core/safe-html.js'
+import { TemplateResult } from '../core/template-result.js'
 import { renderAttrsObject, renderAttrValue } from './attributes.js'
 
 const ATTRS_CONTEXT_RE = /\sattrs=$/
 const SCALAR_ATTR_CONTEXT_RE = /\s([^\s<>"'=/]+)=$/
 
 function isTemplateResult(value: unknown): value is TemplateResult {
-  if (!value || typeof value !== 'object')
-    return false
-
-  return 'strings' in value && 'values' in value && 'html' in value
+  return value instanceof TemplateResult
 }
 
 function isIterable(value: unknown): value is Iterable<TemplateValue> {
@@ -29,15 +26,22 @@ function isAttrObject(value: unknown): value is AttrMap {
     && !isIterable(value)
 }
 
-function renderContentValue(value: TemplateValue): string {
+function renderContentValue(value: TemplateValue, ancestors = new Set<unknown>()): string {
   if (value == null)
     return ''
   if (value instanceof RawHtml)
     return value.value
   if (isTemplateResult(value))
     return value.html.value
-  if (isIterable(value))
-    return Array.from(value, item => renderContentValue(item)).join('')
+  if (isIterable(value)) {
+    if (ancestors.has(value))
+      throw new TypeError('Cyclic iterable in content position')
+
+    ancestors.add(value)
+    const rendered = Array.from(value, item => renderContentValue(item, ancestors)).join('')
+    ancestors.delete(value)
+    return rendered
+  }
   if (isAttrObject(value))
     throw new TypeError('Unsupported template value in content position')
   if (typeof value === 'function' || typeof value === 'symbol' || typeof value === 'bigint' || typeof value === 'object')
