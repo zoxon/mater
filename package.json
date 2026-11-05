@@ -1,7 +1,7 @@
 {
   "name": "@zoxon/mater",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "packageManager": "pnpm@10.33.0",
   "description": "Foundational TemplateResult runtime for JSX and tagged-template UI.",
   "author": "Konstantin Velichko",
