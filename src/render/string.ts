@@ -142,7 +142,9 @@ export function renderToString(result: TemplateResult): SafeHtml {
       continue
     }
 
-    const scalarMatch = inAttrPosition ? rawSegment.match(SCALAR_ATTR_CONTEXT_RE) : null
+    const scalarMatch = inAttrPosition
+      ? rawSegment.match(SCALAR_ATTR_CONTEXT_RE)
+      : null
     if (scalarMatch) {
       const attrName = scalarMatch[1]
       const segment = rawSegment.slice(0, -scalarMatch[0].length)
@@ -156,7 +158,9 @@ export function renderToString(result: TemplateResult): SafeHtml {
       if (priorScalarIndex !== undefined)
         parts[priorScalarIndex] = ''
 
-      const rendered = lockedAttrs.has(attrName) ? '' : renderAttrValue(attrName, value as AttrValue)
+      const rendered = lockedAttrs.has(attrName)
+        ? ''
+        : renderAttrValue(attrName, value as AttrValue)
       const renderedIndex = parts.push(rendered) - 1
       if (!lockedAttrs.has(attrName))
         scalarAttrPartIndexes.set(attrName, renderedIndex)

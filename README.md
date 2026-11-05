@@ -122,8 +122,9 @@ const htmlString = render(Card({ title: 'Hi', body: trustedHtml }))
 Keep shared components in plain TypeScript and return `TemplateResult`. Convert only at the boundary:
 
 ```ts
+import type { TemplateResult } from '@zoxon/mater'
 // CurrencyValue.ts
-import { html, type TemplateResult } from '@zoxon/mater'
+import { html } from '@zoxon/mater'
 
 export interface CurrencyValueProps {
   value?: string | number | null
@@ -134,10 +135,14 @@ export interface CurrencyValueProps {
 }
 
 export function CurrencyValue(props: CurrencyValueProps): TemplateResult {
-  const value = props.value == null ? '-' : Number(props.value).toFixed(props.precision ?? 2)
+  const value = props.value == null
+    ? '-'
+    : Number(props.value).toFixed(props.precision ?? 2)
 
   return html`<span class=${['currency-value', props.grayed && 'is-grayed', props.class]}>
-    ${value}${props.ticker ? html` <small>${props.ticker}</small>` : null}
+    ${value}${props.ticker
+      ? html` <small>${props.ticker}</small>`
+      : null}
   </span>`
 }
 ```
@@ -204,12 +209,21 @@ export interface CurrencyValueProps {
 }
 
 export function CurrencyValue(props: CurrencyValueProps): TemplateResult {
-  const value = props.value == null ? '-' : Number(props.value).toFixed(props.precision ?? 2)
+  const value = props.value == null
+    ? '-'
+    : Number(props.value).toFixed(props.precision ?? 2)
 
   return (
     <span class={['currency-value', props.grayed && 'is-grayed', props.class]}>
       {value}
-      {props.ticker ? <small> {props.ticker}</small> : null}
+      {props.ticker
+        ? (
+            <small>
+              {' '}
+              {props.ticker}
+            </small>
+          )
+        : null}
     </span>
   )
 }

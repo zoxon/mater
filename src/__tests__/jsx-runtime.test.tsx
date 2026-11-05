@@ -80,8 +80,12 @@ describe('@zoxon/mater JSX runtime', () => {
 
   it('exports callable jsx helpers', () => {
     expect(jsx('div', { children: 'A' }).html.value).toBe('<div>A</div>')
-    expect(jsxs('div', { children: ['A', 'B'] }).html.value).toBe('<div>AB</div>')
-    expect(Fragment({ children: ['A', 'B'] }).html.value).toBe('AB')
+    expect(jsxs('div', {
+      children: ['A', 'B'],
+    }).html.value).toBe('<div>AB</div>')
+    expect(Fragment({
+      children: ['A', 'B'],
+    }).html.value).toBe('AB')
     expect(jsxDEV('div', { children: 'A' }).html.value).toBe('<div>A</div>')
   })
 })
