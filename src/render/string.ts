@@ -83,6 +83,33 @@ function hasUnquotedTagClose(segment: string): boolean {
   return false
 }
 
+interface TagScanState {
+  inTag: boolean
+  quote?: '"' | '\''
+}
+
+const TAG_START_RE = /[a-z/]/i
+
+function scanTagState(segment: string, state: TagScanState): void {
+  for (let i = 0; i < segment.length; i++) {
+    const char = segment[i]
+
+    if (state.quote) {
+      if (char === state.quote)
+        state.quote = undefined
+    }
+    else if (state.inTag) {
+      if (char === '"' || char === '\'')
+        state.quote = char
+      else if (char === '>')
+        state.inTag = false
+    }
+    else if (char === '<' && TAG_START_RE.test(segment[i + 1] ?? '')) {
+      state.inTag = true
+    }
+  }
+}
+
 function removePriorScalarAttrs(attrs: AttrMap, scalarAttrPartIndexes: Map<string, number>, parts: string[]): void {
   for (const name of Object.keys(attrs)) {
     const index = scalarAttrPartIndexes.get(name)
@@ -95,14 +122,17 @@ export function renderToString(result: TemplateResult): SafeHtml {
   const parts: string[] = []
   const lockedAttrs = new Set<string>()
   const scalarAttrPartIndexes = new Map<string, number>()
+  const tagState: TagScanState = { inTag: false }
 
   for (let i = 0; i < result.values.length; i++) {
     const rawSegment = result.strings[i] ?? ''
     const value = result.values[i] as TemplateValue
 
     clearTagStateIfTagClosed(lockedAttrs, scalarAttrPartIndexes, rawSegment)
+    scanTagState(rawSegment, tagState)
+    const inAttrPosition = tagState.inTag && !tagState.quote
 
-    if (ATTRS_CONTEXT_RE.test(rawSegment)) {
+    if (inAttrPosition && ATTRS_CONTEXT_RE.test(rawSegment)) {
       const segment = rawSegment.replace(ATTRS_CONTEXT_RE, '')
       if (!isAttrObject(value))
         throw new TypeError('attrs= expects an object value')
@@ -112,7 +142,7 @@ export function renderToString(result: TemplateResult): SafeHtml {
       continue
     }
 
-    const scalarMatch = rawSegment.match(SCALAR_ATTR_CONTEXT_RE)
+    const scalarMatch = inAttrPosition ? rawSegment.match(SCALAR_ATTR_CONTEXT_RE) : null
     if (scalarMatch) {
       const attrName = scalarMatch[1]
       const segment = rawSegment.slice(0, -scalarMatch[0].length)

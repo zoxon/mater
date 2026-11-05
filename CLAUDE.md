@@ -33,7 +33,7 @@ Entry points (see `tsup.config.ts`, `package.json` exports): `.` (index), `./bro
 ## Gotchas
 
 - Attribute override in `renderToString`: `attrs=` always wins over a scalar attr of the same name on the same tag, regardless of order (a prior scalar is blanked in `parts`; a later scalar is skipped via `lockedAttrs`). Between two scalars, the later wins. `lockedAttrs` / `scalarAttrPartIndexes` reset at the first unquoted `>`. Change the quote/tag-close logic only with tests in `string.test.ts`.
-- Attribute vs content position is inferred by regex on the preceding string chunk, not by a real HTML parser.
+- Attribute vs content position is inferred by `scanTagState` (tracks in-tag and quote state across string chunks) plus a regex on the preceding chunk — not a real HTML parser. `name=` in text content or comments is treated as text. Raw-text elements (`<script>`, `<style>`) are not special-cased.
 - Throws `TypeError`: `RawHtml` in attribute position; functions, symbols, bigints and plain objects in content position; non-object `attrs=` value.
 - `renderAttrValue` (`src/render/attributes.ts`) is the single choke point for all attribute paths (scalar, `attrs=`, JSX); it throws `TypeError` for `on*` names and `javascript:` / `vbscript:` URLs in `URL_ATTRS`. Add new attribute checks there, with tests in `security.test.ts`.
 - `jsxDEV` is just `jsx`; no dev-only behavior.
@@ -45,5 +45,6 @@ Tests live in `src/__tests__/` (`*.test.ts[x]`); `tsconfig` sets `jsxImportSourc
 - Components return `TemplateResult`; `render()` only at string boundaries (SSR, serialization).
 - Browser code uses `.dom`/`.element`, not `innerHTML`.
 - `raw()` only for trusted developer HTML.
+- Security stance: safe by default, `raw()` is the only opt-out, `attrs=` is a plain attribute spread. Guard against developer mistakes (idiot-proofing), not against a malicious developer — no sanitizers, URL allowlists, or Trusted Types. Inline `on*` handlers and `javascript:` URLs are intentionally rejected.
 - Prefer existing tiny helpers; no new framework integrations unless they remove real repeated setup.
 - Runtime behavior belongs in shared render/core modules, not docs examples. Add focused tests for parser/rendering changes. Keep README examples aligned with real exports.

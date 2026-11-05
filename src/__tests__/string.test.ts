@@ -87,4 +87,17 @@ describe('@zoxon/mater string runtime', () => {
     const view = html`<input value=${'\"quoted\"'} />`
     expect(view.html.value).toBe('<input value=\"&quot;quoted&quot;\" />')
   })
+
+  it('does not treat name= in text content as an attribute', () => {
+    expect(html`<p>Total x=${'5'}</p>`.html.value).toBe('<p>Total x=5</p>')
+    expect(html`<p>a=${'<b>'}</p>`.html.value).toBe('<p>a=&lt;b&gt;</p>')
+    expect(html`<!-- x=${'5'} --><p>y</p>`.html.value).toBe('<!-- x=5 --><p>y</p>')
+  })
+
+  it('still detects attributes after text content and in later tags', () => {
+    expect(html`<p>x=${'1'}</p><a href=${'/p'} title="t" class=${'c'}>k</a>`.html.value)
+      .toBe('<p>x=1</p><a href="/p" title="t" class="c">k</a>')
+    expect(html`<a title="a>b" class=${'c'}>k</a>`.html.value)
+      .toBe('<a title="a>b" class="c">k</a>')
+  })
 })
