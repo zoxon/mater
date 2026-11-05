@@ -3,7 +3,6 @@
     "target": "ES2022",
     "jsx": "react-jsx",
     "jsxImportSource": "@zoxon/mater",
-    "baseUrl": ".",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "paths": {
