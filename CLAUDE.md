@@ -35,6 +35,7 @@ Entry points (see `tsup.config.ts`, `package.json` exports): `.` (index), `./bro
 - Attribute override in `renderToString`: `attrs=` always wins over a scalar attr of the same name on the same tag, regardless of order (a prior scalar is blanked in `parts`; a later scalar is skipped via `lockedAttrs`). Between two scalars, the later wins. `lockedAttrs` / `scalarAttrPartIndexes` reset at the first unquoted `>`. Change the quote/tag-close logic only with tests in `string.test.ts`.
 - Attribute vs content position is inferred by regex on the preceding string chunk, not by a real HTML parser.
 - Throws `TypeError`: `RawHtml` in attribute position; functions, symbols, bigints and plain objects in content position; non-object `attrs=` value.
+- `renderAttrValue` (`src/render/attributes.ts`) is the single choke point for all attribute paths (scalar, `attrs=`, JSX); it throws `TypeError` for `on*` names and `javascript:` / `vbscript:` URLs in `URL_ATTRS`. Add new attribute checks there, with tests in `security.test.ts`.
 - `jsxDEV` is just `jsx`; no dev-only behavior.
 
 Tests live in `src/__tests__/` (`*.test.ts[x]`); `tsconfig` sets `jsxImportSource: @zoxon/mater`.

@@ -87,6 +87,13 @@ html`<input attrs=${{ disabled: true, value: 'A&B' }} />`
 
 `attrs=` wins over duplicate scalar attributes on the same element.
 
+Script-bearing attributes are rejected with a `TypeError`, in templates, `attrs=` and JSX alike:
+
+- inline event handlers (`onclick`, `onerror`, any `on*` name);
+- `javascript:` and `vbscript:` URLs in `href`, `src`, `action`, `formaction`, `xlink:href`, `poster`, `data` and `cite`.
+
+Attach behavior from code (`addEventListener`) instead of markup.
+
 ## Component pattern
 
 Components return `TemplateResult`. Use `render()` only at the string boundary.

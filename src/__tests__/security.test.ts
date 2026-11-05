@@ -22,4 +22,29 @@ describe('@zoxon/mater security', () => {
 
     expect(() => html`<div>${cycle}</div>`.html).toThrow(TypeError)
   })
+
+  it('rejects inline event handler attributes in every attribute path', () => {
+    expect(() => html`<a onclick=${'alert(1)'}>x</a>`.html).toThrow(TypeError)
+    expect(() => html`<a attrs=${{ onclick: 'alert(1)' }}>x</a>`.html).toThrow(TypeError)
+    expect(() => html`<a attrs=${{ OnError: 'alert(1)' }}>x</a>`.html).toThrow(TypeError)
+    expect(() => jsx('a', { onclick: 'alert(1)' }).html).toThrow(TypeError)
+  })
+
+  it('rejects javascript: and vbscript: URLs in URL attributes', () => {
+    expect(() => html`<a href=${'javascript:alert(1)'}>x</a>`.html).toThrow(TypeError)
+    expect(() => html`<a href=${' \tJaVa\nScript:alert(1)'}>x</a>`.html).toThrow(TypeError)
+    expect(() => html`<a attrs=${{ href: 'vbscript:msgbox(1)' }}>x</a>`.html).toThrow(TypeError)
+    expect(() => jsx('form', { action: 'javascript:alert(1)' }).html).toThrow(TypeError)
+    expect(() => jsx('button', { formaction: 'javascript:alert(1)' }).html).toThrow(TypeError)
+  })
+
+  it('keeps safe URLs and non-URL attributes untouched', () => {
+    expect(html`<a href=${'/docs'}>x</a>`.html.value).toBe('<a href="/docs">x</a>')
+    expect(html`<a href=${'https://example.com'}>x</a>`.html.value)
+      .toBe('<a href="https://example.com">x</a>')
+    expect(html`<a title=${'javascript:alert(1)'}>x</a>`.html.value)
+      .toBe('<a title="javascript:alert(1)">x</a>')
+    expect(html`<a data-on=${'x'} class=${'one'}>x</a>`.html.value)
+      .toBe('<a data-on="x" class="one">x</a>')
+  })
 })
