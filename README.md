@@ -1,4 +1,7 @@
-# Mater
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="brand/readme-header-dark.svg">
+  <img src="brand/readme-header-light.svg" width="520" alt="Mater: TemplateResult runtime for JSX and tagged templates">
+</picture>
 
 Mater is a foundational runtime for declarative UI. It turns JSX and tagged-template descriptions into concrete output such as HTML strings or DOM fragments — no framework, no virtual DOM.
 
